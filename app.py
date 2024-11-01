@@ -67,7 +67,6 @@ with ui.sidebar():
 
 # When passing in multiple arguments to a function, separate them with commas.
 
-penguins = load_penguins()
 
 #ui.h6("Palmer Penguins Grid View")
 
@@ -76,7 +75,7 @@ with ui.layout_columns():
         ui.card_header("Palmer Penguins Seaborn Histogram") 
         @render.plot(alt="A Seaborn histogram on penguin body mass in grams.")  
         def plot_histogram():  
-            ax = sns.histplot(data=penguins, x="body_mass_g", bins=100)  
+            ax = sns.histplot(data=penguins_df, x="body_mass_g", bins=100)  
             ax.set_title("Penguin Mass")
             ax.set_xlabel("Mass (g)")
             ax.set_ylabel("Count")
@@ -91,7 +90,7 @@ with ui.layout_columns():
         @render_widget  
         def create_histogram_plot():  
             scatterplot = px.histogram(
-                data_frame=penguins,
+                data_frame=penguins_df,
                 x="body_mass_g",
                 nbins=100,
             ).update_layout(
@@ -108,7 +107,7 @@ with ui.layout_columns():
         ui.card_header("Palmer Penguins Grid View") 
         @render.data_frame  
         def penguins_Grid_df():
-            return render.DataGrid(penguins) 
+            return render.DataGrid(penguins_df) 
     
     with ui.card():        
         ui.card_header("Palmer Penguins Total Bill")
@@ -139,7 +138,7 @@ with ui.layout_columns():
         ui.card_header("Palmer Penguins Table View")
         @render.data_frame  
         def penguins_table_df():
-            return render.DataTable(penguins) 
+            return render.DataTable(penguins_df) 
 
     with ui.card():
         ui.card_header("Palmer Penguins Tips")            
