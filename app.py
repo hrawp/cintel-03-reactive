@@ -75,7 +75,7 @@ with ui.layout_columns():
         ui.card_header("Palmer Penguins Seaborn Histogram") 
         @render.plot(alt="A Seaborn histogram on penguin body mass in grams.")  
         def plot_histogram():  
-            ax = sns.histplot(data=penguins_df, x="body_mass_g", bins=100)  
+            ax = sns.histplot(filtered_data(), x="body_mass_g", bins=100)  
             ax.set_title("Penguin Mass")
             ax.set_xlabel("Mass (g)")
             ax.set_ylabel("Count")
@@ -90,7 +90,7 @@ with ui.layout_columns():
         @render_widget  
         def create_histogram_plot():  
             scatterplot = px.histogram(
-                data_frame=penguins_df,
+                data_frame=filtered_data(),
                 x="body_mass_g",
                 nbins=100,
             ).update_layout(
@@ -107,7 +107,7 @@ with ui.layout_columns():
         ui.card_header("Palmer Penguins Grid View") 
         @render.data_frame  
         def penguins_Grid_df():
-            return render.DataGrid(penguins_df) 
+            return render.DataGrid(filtered_data()) 
     
     with ui.card():        
         ui.card_header("Palmer Penguins Total Bill")
@@ -121,7 +121,7 @@ with ui.layout_columns():
         ui.card_header("Plotly Scatterplot: Species")
         @render_plotly
         def plotly_scatterplot():
-                return px.scatter(penguins_df,
+                return px.scatter(filtered_data(),
                     x="bill_length_mm",
                     y="body_mass_g",
                     color="species",
@@ -138,7 +138,7 @@ with ui.layout_columns():
         ui.card_header("Palmer Penguins Table View")
         @render.data_frame  
         def penguins_table_df():
-            return render.DataTable(penguins_df) 
+            return render.DataTable(filtered_data()) 
 
     with ui.card():
         ui.card_header("Palmer Penguins Tips")            
