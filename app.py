@@ -2,7 +2,7 @@ import plotly.express as px
 from shiny.express import input, ui
 from shinywidgets import render_plotly
 from palmerpenguins import load_penguins
-from shiny import render, reactive
+from shiny import render, reactive, req
 from shinywidgets import render_widget
 import seaborn as sns
 import palmerpenguins  # This package provides the Palmer Penguins dataset
@@ -37,7 +37,7 @@ with ui.sidebar():
 #   a list of options for the input (in square brackets) 
 #   e.g. ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"]
 
-    ui.input_numeric("plotly_bin_count", "Fidelity of Columns",0) #to create a numeric input for the number of Plotly histogram bins
+    ui.input_numeric("plotly_bin_count", "Number of Bins",0) #to create a numeric input for the number of Plotly histogram bins
 #   pass in two arguments:
 #   the name of the input (in quotes), e.g. "plotly_bin_count"
 #   the label for the input (in quotes)
@@ -59,7 +59,7 @@ with ui.sidebar():
 #   a keyword argument selected= a list of selected options for the input (in square brackets)
 #   a keyword argument inline= a Boolean value (True or False) as you
     ui.hr() #to add a horizontal rule to the sidebar
-    ui.a("GitHub",href="https://github.com/hrawp/cintel-02-data",target= "_blank") #to add a hyperlink to the sidebar
+    ui.a("Link to my GitHub",href="https://github.com/hrawp/cintel-03-reactive",target= "_blank") #to add a hyperlink to the sidebar
 #   pass in two arguments:
 #   the text for the hyperlink (in quotes), e.g. "GitHub"
 #   a keyword argument href= the URL for the hyperlink (in quotes), e.g. your GitHub repo URL
@@ -75,7 +75,7 @@ with ui.layout_columns():
         ui.card_header("Palmer Penguins Seaborn Histogram") 
         @render.plot(alt="A Seaborn histogram on penguin body mass in grams.")  
         def plot_histogram():  
-            ax = sns.histplot(filtered_data(), x="body_mass_g", bins=100)  
+            ax = sns.histplot(filtered_data(), x="body_mass_g", bins=input.seaborn_bin_count())  
             ax.set_title("Penguin Mass")
             ax.set_xlabel("Mass (g)")
             ax.set_ylabel("Count")
@@ -92,7 +92,7 @@ with ui.layout_columns():
             scatterplot = px.histogram(
                 data_frame=filtered_data(),
                 x="body_mass_g",
-                nbins=100,
+                nbins=input.plotly_bin_count(),
             ).update_layout(
                 title={"text": "Penguin Mass", "x": 0.5},
                 yaxis_title="Count",
@@ -109,11 +109,11 @@ with ui.layout_columns():
         def penguins_Grid_df():
             return render.DataGrid(filtered_data()) 
     
-    with ui.card():        
-        ui.card_header("Palmer Penguins Total Bill")
-        @render_plotly
-        def plot2():
-            return px.histogram(px.data.tips(), y="total_bill")
+#    with ui.card():        
+#        ui.card_header("Palmer Penguins Total Bill")
+ #       @render_plotly
+#        def plot2():
+#            return px.histogram(px.data.tips(), y="total_bill")
 
 
 with ui.layout_columns():
@@ -122,7 +122,7 @@ with ui.layout_columns():
         @render_plotly
         def plotly_scatterplot():
                 return px.scatter(filtered_data(),
-                    x="bill_length_mm",
+                    x=input.selected_attribute(),
                     y="body_mass_g",
                     color="species",
                     title="Penguins Plot (Plotly Express)",
@@ -140,11 +140,11 @@ with ui.layout_columns():
         def penguins_table_df():
             return render.DataTable(filtered_data()) 
 
-    with ui.card():
-        ui.card_header("Palmer Penguins Tips")            
-        @render_plotly
-        def plot1():
-            return px.histogram(px.data.tips(), y="tip")
+#    with ui.card():
+#        ui.card_header("Palmer Penguins Tips")            
+#        @render_plotly
+#        def plot1():
+#            return px.histogram(px.data.tips(), y="tip")
 
 
 # --------------------------------------------------------
@@ -156,6 +156,22 @@ with ui.layout_columns():
 # The function will be called whenever an input functions used to generate that output changes.
 # Any output that depends on the reactive function (e.g., filtered_data()) will be updated when the data changes.
 
+#@reactive.calc
+#def filtered_data():
+#    return penguins_df
+
+
 @reactive.calc
 def filtered_data():
-    return penguins_df
+
+    # The required function req() is used to ensure that
+    # the input.selected_species_list() function is not empty.
+    req(input.selected_species_list())
+
+    # If empty, req() will stop the execution and 
+    # we'll just wait until the associated input changes to not empty.
+    # If not empty, we'll continue and filter the data.
+    isSpeciesMatch = penguins_df["species"].isin(input.selected_species_list())
+
+    return penguins_df[isSpeciesMatch]
+
